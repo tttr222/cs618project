@@ -27,6 +27,14 @@ Technologies and Implementation Details
 * The server will be implemented via Python 2.7 with a simple HTTP library.
 * The core learning and classifying algorithm will be implemented with 
   the following libraries:
-	* Natural Language Processing Toolkit - nlptk
-	* Machine Learning Library - scikitlearn 
- 
+	* Natural Language Toolkit - nltk
+	* Machine Learning Library - scikit-learn 
+
+Prerequisites
+* Install nltk - http://www.nltk.org/install.html
+	* On linux, run sudo pip install nltk
+
+* Install scikitlearn - http://scikit-learn.org/stable/install.html
+	* On linux, run sudo pip install scikit-learn
+
+* Might also need numpy, but that probably comes with scikit-learn 
