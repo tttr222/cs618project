@@ -1,7 +1,8 @@
+Last Updated: 4/5/2016
+
 CS618 Project
-March 25 2016
-Tung Tran
-Xiaofei Zhang
+
+Tung Tran and Xiaofei Zhang
 
 Core Design
 * The program will employ a client-server architecture.
