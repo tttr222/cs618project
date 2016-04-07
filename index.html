@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Cancer Classification</title>
+</head>
+<body>
+
+<h1>Cancer Classification</h1>
+<hr color=#d8d8d8>
+
+<style type="text/css">
+textarea.input-box {background-color:#ffffff;background-repeat:no-repeat;background-attachment:fixed;border-width:1;border-style:solid;border-color:#cccccc;font-family:Arial;font-size:11pt;color:#000000;}
+textarea.output-box {background-color:#d8d8d8;background-repeat:no-repeat;background-attachment:fixed;border-width:1;border-style:solid;border-color:#d8d8d8;font-family:Arial;font-size:11pt;color:#000000;}
+input.input-box {font-family:Arial;font-size:11pt;color:000000;}
+</style>
+
+
+
+<style>
+#input {position: absolute; top 5cm; left:20px; width:30% }
+#output {position: absolute; top 5cm; width:30%; left:640px }
+#footer {position: absolute; bottom: 20px;left: 20px; height: 20px;width: 100%;font-family:Arial;font-size:10pt;color:#000000;}
+</style>
+
+<div id="input">
+<p>Enter the pathology report content below:</p>
+<form method="post" action="http://"><textarea name="report" cols="80" rows="10" class="input-box"></textarea><br><input type="submit" value="Submit" class="input-box"><input type="reset" value="Reset" class="input-box"></form>
+</div>
+
+<div id="output">
+<p>Results:</p>
+<form method="get" action="http://"><textarea readonly="readonly" name="report" cols="80" rows="10" class="output-box"></textarea><br></form>
+</div>
+
+
+
+<div id="footer">
+<p>Copyright 2016 Tung Tran and Xiaofei Zhang</p>
+</div>
+
+</body>
+</html>
