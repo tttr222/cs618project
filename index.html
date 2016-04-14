@@ -27,7 +27,7 @@ input.input-box {font-family:Arial;font-size:11pt;color:000000;}
 $(document).ready(function(){
 	$("#submit").click(function(){
 		
-		$.ajax({url: "/request", success: function(data) {
+		$.ajax({url: "http://knight.ttr2.info:8080/request", success: function(data) {
 			$("#output").text(data);
 		}});
 	});
