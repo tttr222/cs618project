@@ -16,7 +16,7 @@ input.input-box {font-family:Arial;font-size:11pt;color:000000;}
 #footer {position: absolute; bottom: 20px;left: 20px; height: 20px;width: 100%;font-family:Arial;font-size:10pt;color:#000000;}
 </style>
 
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
+<script src="https://code.jquery.com/jquery-2.2.3.min.js"></script>
 <script>
 /*$(document).ready(function(){
     $("#submit").click(function(){
@@ -26,14 +26,9 @@ input.input-box {font-family:Arial;font-size:11pt;color:000000;}
 
 $(document).ready(function(){
 	$("#submit").click(function(){
-	
-		/*$.get("http://knight.ttr2.info:8080/", function(data, status){
-			//$("#output").text("Data: " + data + "\nStatus: " + status);
-			alert("Data: " + data + "\nStatus: " + status);
-		});*/
 		
-		$.ajax({url: "http://knight.ttr2.info:8080/", dataType: "jsonp", success: function(data) {
-			alert("Data: " + data + "\nStatus: " + status);
+		$.ajax({url: "/request", success: function(data) {
+			$("#output").text(data);
 		}});
 	});
 });
@@ -48,12 +43,12 @@ $(document).ready(function(){
 
 <div id="input_div">
 <p>Enter the pathology report content below:</p>
-<form method="post" ><textarea name="report" id = "input" cols="80" rows="10" class="input-box"></textarea><br><input type="submit" id="submit" value="Submit" class="input-box"><input type="reset" value="Reset" class="input-box"></form>
+<textarea name="report" id = "input" cols="80" rows="10" class="input-box"></textarea><br><input type="submit" id="submit" value="Submit" class="input-box"><input type="reset" value="Reset" class="input-box">
 </div>
 
 <div id="output_div">
 <p>Results:</p>
-<form method="get" ><textarea readonly="readonly" id = "output" name="report" cols="80" rows="10" class="output-box"></textarea><br></form>
+<textarea readonly="readonly" id = "output" name="report" cols="80" rows="10" class="output-box"></textarea><br>
 </div>
 
 
