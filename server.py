@@ -32,14 +32,25 @@ class myHandler(BaseHTTPRequestHandler):
 		return
 		
 	def do_POST(self):
-		
-		
-		#if self.path == '/request':
-		self.send_response(200)
-		self.send_header('Content-type','text/json')
-		self.end_headers()
-		
-		self.wfile.write("{'test':'hello world'}")
+		if self.path == '/request':
+			ctype, pdict = cgi.parse_header(self.headers.getheader('content-type'))
+			if ctype == 'multipart/form-data':
+				postvars = cgi.parse_multipart(self.rfile, pdict)
+			elif ctype == 'application/x-www-form-urlencoded':
+				length = int(self.headers.getheader('content-length'))
+				postvars = cgi.parse_qs(self.rfile.read(length), keep_blank_values=1)
+			else:
+				postvars = {}
+
+			self.send_response(200)
+			self.send_header('Access-Control-Allow-Origin','*')
+			self.send_header('Content-type','text/json')
+			self.end_headers()
+			request = str(postvars['text'][0])
+			rsp = "HELLO GELLO, The request was: " + request
+			print rsp
+			self.wfile.write('{"request":"' 
+				+ request + '","response":"' + rsp + '"}')
 
 try:
 	#Create a web server and define the handler to manage the

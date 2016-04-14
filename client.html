@@ -26,10 +26,20 @@ input.input-box {font-family:Arial;font-size:11pt;color:000000;}
 
 $(document).ready(function(){
 	$("#submit").click(function(){
-		
-		$.ajax({url: "http://knight.ttr2.info:8080/request", success: function(data) {
-			$("#output").text(data);
-		}});
+		v = $("#input").val();
+		console.log('The input is: ' + v)
+		$.post({url: "http://knight.ttr2.info:8080/request", dataType: 'json', data: {"text":v}, success: function(data) {
+			$("#output").text(data['response']);
+		}}).done(function() {
+			console.log("second success")
+		  })
+		  .fail(function(e) {
+			console.log("failed")
+			console.log(e)
+		  })
+		  .always(function() {
+			console.log("finished")
+		});
 	});
 });
 </script>
