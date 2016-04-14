@@ -1,6 +1,6 @@
 #!/usr/bin/python
 from BaseHTTPServer import BaseHTTPRequestHandler,HTTPServer
-import cgi
+import cgi, learn
 
 PORT_NUMBER = 8080
 
@@ -47,7 +47,8 @@ class myHandler(BaseHTTPRequestHandler):
 			self.send_header('Content-type','text/json')
 			self.end_headers()
 			request = str(postvars['text'][0])
-			rsp = "HELLO GELLO, The request was: " + request
+			#rsp = "HELLO GELLO, The request was: " + request
+			rsp = str(learn.execute(request)[0])
 			print rsp
 			self.wfile.write('{"request":"' 
 				+ request + '","response":"' + rsp + '"}')
