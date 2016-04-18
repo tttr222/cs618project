@@ -211,13 +211,13 @@ def response(outcome):
 		return "Your input doesn't have enough information for the cancer site prediction."
 	elif outcome[0] == 'OTHER':
 		return "The cancer site is other than BREAST, LUNG, PROSTATE, CRC."
-	elif outcome[0] == 'BEAST':
-		return "The cancer site is BREAST. Estrogen receptor is ", str(outcome[1])," and progesterone receptor is ", str(outcome[2]), "."
+	elif outcome[0] == 'BREAST':
+		return "The cancer site is BREAST. Estrogen receptor is " + str(outcome[1]) + " and progesterone receptor is " + str(outcome[2]) + "."
 	elif outcome[0] == 'LUNG':
-		return "The cancer site is LUNG. Cancer cell type is ", str(outcome[3])
+		return "The cancer site is LUNG. Cancer cell type is " + str(outcome[3])
 	elif outcome[0] == 'CRC':
-		return "The cancer site is COLON or RECTUM. Carcinoembryonic antigen result is ", str(outcome[4])
+		return "The cancer site is COLON or RECTUM. Carcinoembryonic antigen result is " + str(outcome[4]) + "."
 	else:
-		return "The cancer site is PROSTATE"
+		return "The cancer site is PROSTATE."
 
 #return "The diagnosis is ", outcome[0], "Also, ", str(outcome[1:])
