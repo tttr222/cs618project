@@ -6,13 +6,9 @@
 textarea.input-box {background-color:#ffffff;background-repeat:no-repeat;background-attachment:fixed;border-width:1;border-style:solid;border-color:#cccccc;font-family:Arial;font-size:11pt;color:#000000;}
 textarea.output-box {background-color:#d8d8d8;background-repeat:no-repeat;background-attachment:fixed;border-width:1;border-style:solid;border-color:#d8d8d8;font-family:Arial;font-size:11pt;color:#000000;}
 input.input-box {font-family:Arial;font-size:11pt;color:000000;}
-</style>
 
-
-
-<style>
-#input_div {position: absolute; top 5cm; left:20px; width:30% }
-#output_div {position: absolute; top 5cm; width:30%; left:640px }
+#input_div {position: absolute; top 5cm; left:20px; width:400px }
+#output_div {position: absolute; top 5cm; width:30%; left:500px }
 #footer {position: absolute; bottom: 20px;left: 20px; height: 20px;width: 100%;font-family:Arial;font-size:10pt;color:#000000;}
 </style>
 
@@ -28,6 +24,7 @@ $(document).ready(function(){
 	$("#submit").click(function(){
 		v = $("#input").val();
 		console.log('The input is: ' + v)
+		$("#output").text('Awaiting response from server..');
 		$.post({url: "http://knight.ttr2.info:8080/request", dataType: 'json', data: {"text":v}, success: function(data) {
 			$("#output").text(data['response']);
 		}}).done(function() {
@@ -53,12 +50,12 @@ $(document).ready(function(){
 
 <div id="input_div">
 <p>Enter the pathology report content below:</p>
-<textarea name="report" id = "input" cols="80" rows="10" class="input-box"></textarea><br><input type="submit" id="submit" value="Submit" class="input-box"><input type="reset" value="Reset" class="input-box">
+<textarea name="report" id = "input" cols="64" rows="20" class="input-box"></textarea><br><input type="submit" id="submit" value="Submit" class="input-box"><input type="reset" value="Reset" class="input-box">
 </div>
 
 <div id="output_div">
 <p>Results:</p>
-<textarea readonly="readonly" id = "output" name="report" cols="80" rows="10" class="output-box"></textarea><br>
+<textarea readonly="readonly" id = "output" name="report" cols="64" rows="20" class="output-box"></textarea><br>
 </div>
 
 

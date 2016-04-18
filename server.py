@@ -1,6 +1,6 @@
 #!/usr/bin/python
 from BaseHTTPServer import BaseHTTPRequestHandler,HTTPServer
-import cgi, learn
+import cgi, learn, json
 
 PORT_NUMBER = 8080
 
@@ -48,10 +48,12 @@ class myHandler(BaseHTTPRequestHandler):
 			self.end_headers()
 			request = str(postvars['text'][0])
 			#rsp = "HELLO GELLO, The request was: " + request
-			rsp = str(learn.execute(request)[0])
-			print rsp
-			self.wfile.write('{"request":"' 
-				+ request + '","response":"' + rsp + '"}')
+			rsp = learn.execute(request)
+			obj = {}
+			obj['request'] = request
+			obj['response'] = rsp
+			print obj
+			self.wfile.write(json.dumps(obj))
 
 try:
 	#Create a web server and define the handler to manage the

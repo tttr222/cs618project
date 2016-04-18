@@ -75,7 +75,6 @@ def dictionary(rows):
 	return dv
 
 def extractY(data):
-	
 	# 0 = SITE_TYPE
 	# 1 = BREAST_ER
 	# 2 = BREAST_PR
@@ -89,25 +88,25 @@ def extractY(data):
 	for obj in data:
 		y0.append(obj['SITE_TYPE'])
 		
-		if obj['BREAST_ER'] == '':
+		if obj['BREAST_ER'].strip() == '':
+			y1.append('NULL')
+		else:
 			y1.append(obj['BREAST_ER'])
-		else:
-			y1.append('Null')
 		
-		if obj['BREAST_PR'] == '':
+		if obj['BREAST_PR'].strip() == '':
+			y2.append('NULL')
+		else:
 			y2.append(obj['BREAST_PR'])
-		else:
-			y2.append('Null')
 		
-		if obj['LUNG_CELLTYPE'] == '':
+		if obj['LUNG_CELLTYPE'].strip() == '':
+			y3.append('NULL')
+		else:
 			y3.append(obj['LUNG_CELLTYPE'])
-		else:
-			y3.append('Null')
 		
-		if obj['CRC_CEA'] == '':
-			y4.append(obj['CRC_CEA'])
+		if obj['CRC_CEA'].strip() == '':
+			y4.append('NULL')
 		else:
-			y4.append('Null')
+			y4.append(obj['CRC_CEA'])
 	
 	return [y0, y1, y2, y3, y4]
 
@@ -155,7 +154,6 @@ def test():
 
 	for i in range(5):
 		print "Score for",i,"is", lr[i].score(XTest,eyTest[i])
-	
 
 def execute(query):
 	# translate csv into rows
@@ -164,17 +162,46 @@ def execute(query):
 		reader = csv.reader(f,delimiter=',', quotechar='"')
 		for r in reader:
 			rows.append(r)
+			
+	dv = dictionary(rows)
 
-	X, y, dv = format(rows)
+	dataTrain = rows2objects(rows)
+	XTrain = dv.transform(dictlist(dataTrain))
+	eyTrain = extractY(dataTrain)
 
 	# fit the matrix to a model 
-	lr = LogisticRegression()
-	lr.fit(X,y)
-
-	# try to predict one example
-	#test = "Gross Description.The specimen, labeled right breast ultrasound guided biopsy, received in.formalin, consists of a 1.8x1.0x0.3 cm aggregate of tan/pink fibroadipose breast.tissue cores which were placed in formalin at 11:55 am and are now submitted in.one cassette..HM/mbc Microscopic Description.Sections show a needle core biopsy in which there is extensive infiltrating and.in situ ductal adenocarcinoma. The tumor shows focal comedo necrosis in the in.situ tumor and a desmoplastic response in the fibrous connective tissue.intimately associated with the invasive carcinoma. The tumor is high-grade with.marked nuclear pleomorphism, single cell necrosis, prominent nucleoli and no.propensity to form tubules. Cancerization of lobules by the DCIS is noted. .Lymphvascular invasion is not identified.    .DGD/mbc .ADDITIONAL MICROSCOPIC DESCRIPTION: Immunohistochemistry for estrogen receptor.shows focal nuclear positivity in less than 5% of the tumor nuclei..Immunohistochemistry for progesterone receptor shows a similar approximately 5%.positivity in the tumor. There is very good staining of the adjacent normal.neoplastic breast tissue. All controls stain appropriately including external.positive, internal negative and external negative controls as required.   .**INITIALS"
+	lr = []
+	for i in range(5):
+		lrx = LogisticRegression()
+		lrx.fit(XTrain,eyTrain[i])
+		lr.append(lrx)
 
 	ex = dv.transform(text2dict(query))
-	pd = lr.predict(ex)
+	outcome = []
+	for i in range(5):
+		probas = lr[i].predict_proba(ex)[0]
+		prediction = lr[i].predict(ex)[0]
+		classes = list(lr[i].classes_)
+		
+		print probas
+		print classes
+		confidence = probas[classes.index(prediction)]
+		print prediction, confidence
+		
+		if i == 1 and outcome[0] != 'BREAST':
+			outcome.append('DNA')
+		elif i == 2 and outcome[0] != 'BREAST':
+			outcome.append('DNA')
+		elif i == 3 and outcome[0] != 'LUNG':
+			outcome.append('DNA')
+		elif i == 4 and outcome[0] != 'CRC':
+			outcome.append('DNA')
+		elif float(confidence) > 0.6:
+			outcome.append(prediction)
+		else:
+			outcome.append('UNSURE')
 
-	return pd
+	return response(outcome)
+	
+def response(outcome):
+	return "The diagnosis is ", outcome[0], "Also, ", str(outcome[1:])
