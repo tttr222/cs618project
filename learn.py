@@ -1,18 +1,26 @@
 import nltk, csv, random, numpy
 from sklearn.linear_model import LogisticRegression
 from sklearn.feature_extraction import DictVectorizer
+from sklearn.decomposition import TruncatedSVD
 
 # transforms text to a word frequency dictionary
 def text2dict(text):
-	tokens = nltk.word_tokenize(text)
+	sentences = text.split('.')
+	tokens = []
+	for s in sentences:
+		tks = nltk.word_tokenize(s)
 
-	#for i in range(len(tokens)-1):
-	#	tokens.append(tokens[i] + '0' + tokens[i+1])
+		# consider unigrams and 2-grams
+		for i in range(len(tks)-1):
+			tks.append(tks[i] + '' + tks[i+1])
+			
+		tokens += tks
 
 	dictionary = {}
 	for t in tokens:
 		if not t.isalnum():
 			continue
+			
 		t = t.lower()
 		if t not in dictionary:
 			dictionary[str(t)] = 0
@@ -21,6 +29,7 @@ def text2dict(text):
 	return dictionary
 
 columns = []
+# transform rows into objects
 def rows2objects(rows):
 	# translate each row into an object
 	global columns
@@ -34,21 +43,20 @@ def rows2objects(rows):
 		
 		obj = {}
 		for k in range(len(rows[0])):
-			obj[rows[0][k]] = r[k].replace('\\X0D\\\\X0A\\',' -- ')
+			# remove newline encoding
+			obj[rows[0][k]] = r[k].replace('\\X0D\\\\X0A\\',' -- ').replace('.','. ')
 		
 		data.append(obj)
 
 	return data
-
+	
+# create a list of word frequency dictionaries one for each row
 def dictlist(data):
 	dictlist = []
 
-	# concatenate text fields from objects, tokenize,
-	# create a list of word frequency dictionaries
-	# one for each row
-	#print columns
 	for obj in data:
 		text = ''
+		# concatenate text fields from objects, tokenize
 		for k in columns:
 			if 'TEXT' in k:
 				text += obj[k]
@@ -59,21 +67,18 @@ def dictlist(data):
 		
 	return dictlist
 
+
+# convert the dictionaries into a matrix
 def dictionary(rows):
-	
 	dl = dictlist(rows2objects(rows))
 
-	# print out a sample dictionary for testing
-	#print dictlist[0]
-
-	# convert the dictionaries into a matrix
 	dv = DictVectorizer()
-	#X = dv.fit_transform(dictlist)
 	dv.fit(dl)
 	
-	#return X, y, dv
 	return dv
 
+# take the objects and extract the target output label
+# and return it as a vector 
 def extractY(data):
 	# 0 = SITE_TYPE
 	# 1 = BREAST_ER
@@ -88,28 +93,29 @@ def extractY(data):
 	for obj in data:
 		y0.append(obj['SITE_TYPE'])
 		
-		if obj['BREAST_ER'].strip() == '':
+		if obj['BREAST_ER'].strip() == '' or obj['BREAST_ER'] == 'OTHER':
 			y1.append('NULL')
 		else:
 			y1.append(obj['BREAST_ER'])
 		
-		if obj['BREAST_PR'].strip() == '':
+		if obj['BREAST_PR'].strip() == '' or obj['BREAST_PR'] == 'OTHER':
 			y2.append('NULL')
 		else:
 			y2.append(obj['BREAST_PR'])
 		
-		if obj['LUNG_CELLTYPE'].strip() == '':
+		if obj['LUNG_CELLTYPE'].strip() == '' or obj['LUNG_CELLTYPE'] == 'OTHER':
 			y3.append('NULL')
 		else:
 			y3.append(obj['LUNG_CELLTYPE'])
 		
-		if obj['CRC_CEA'].strip() == '':
+		if obj['CRC_CEA'].strip() == '' or obj['CRC_CEA'] == 'OTHER':
 			y4.append('NULL')
 		else:
 			y4.append(obj['CRC_CEA'])
 	
 	return [y0, y1, y2, y3, y4]
 
+# for testing the accuracy of the machine
 def test():
 	rows = []
 	with open('data/training_data.csv','r') as f:
@@ -119,6 +125,8 @@ def test():
 			
 	dv = dictionary(rows)
 
+	# split the dataset into training and testing examples
+	# the ratio will be 70:30 training to testing
 	header = rows[0]
 	rows = rows[1:]
 	random.shuffle(rows)
@@ -129,6 +137,8 @@ def test():
 	rowTest = rows[int(l*0.7):]
 	rowTest.insert(0,header)
 	
+	# transform the rows into objects, and then to matrix
+	# additionally extract y labels
 	dataTrain = rows2objects(rowTrain)
 	XTrain = dv.transform(dictlist(dataTrain))
 	eyTrain = extractY(dataTrain)
@@ -142,18 +152,29 @@ def test():
 	lr = []
 	# fit the matrix to a model 
 	for i in range(5):
+		yCurrentLevel = numpy.array(eyTrain[i])
+		idx = numpy.where(yCurrentLevel != 'NULL')[0]
 		lrx = LogisticRegression()
-		lrx.fit(XTrain,eyTrain[i])
+		lrx.fit(XTrain[idx],yCurrentLevel[idx])
 		lr.append(lrx)
 	
-	print zip(lr[0].predict(XTest),lr[0].predict_proba(XTest))
+	#print zip(lr[0].predict(XTest),lr[0].predict_proba(XTest))
 	print len(rowTrain), len(rowTest)
 	print "Training Size is", XTrain.shape
 	print "Testing Size is", XTest.shape
 	print "Row length is", len(rows)
 
+	levels = ['SITE_TYPE', 'BREAST_ER', 'BREAST_PR','LUNG_CELLTYPE','CRC_CEA']
+	
 	for i in range(5):
-		print "Score for",i,"is", lr[i].score(XTest,eyTest[i])
+		yCurrentLevel = numpy.array(eyTest[i])
+		#print yCurrentLevel
+		idx = numpy.where(yCurrentLevel != 'NULL')[0]
+		#print idx
+		X = XTest[idx]
+		y = yCurrentLevel[idx]
+		score = lr[i].score(X,y)
+		print "Score for",levels[i],"of shape",X.shape,"is", score
 
 def execute(query):
 	# translate csv into rows
@@ -189,55 +210,21 @@ def execute(query):
 		print prediction, confidence
 		
 		if i == 1 and outcome[0] != 'BREAST':
-			outcome.append('DNA')
+			outcome.append('NULL')
 		elif i == 2 and outcome[0] != 'BREAST':
-			outcome.append('DNA')
+			outcome.append('NULL')
 		elif i == 3 and outcome[0] != 'LUNG':
-			outcome.append('DNA')
+			outcome.append('NULL')
 		elif i == 4 and outcome[0] != 'CRC':
-			outcome.append('DNA')
+			outcome.append('NULL')
 		elif float(confidence) > 0.6:
 			outcome.append(prediction)
 		else:
 			outcome.append('UNSURE')
 
 	return response(outcome)
-
-# return the prediction string
+	
 def response(outcome):
-	if outcome[0] == 'UNSURE':
-		return "Your input doesn't have enough information for a precise prediction."
-	elif outcome[0] == '':
-		return "Your input doesn't have enough information for the cancer site prediction."
-	elif outcome[0] == 'OTHER':
-		return "The report shows that the cancer site is other than BREAST, LUNG, PROSTATE, CRC."
-	elif outcome[0] == 'BREAST':
-		str1= "The report indicates the possibility of BREAST cancer. "
-		if outcome[1] != 'UNSURE' and outcome[2] != 'UNSURE':
-			str2="The report test "+ str(outcome[1]) + " for estrogen receptor and " + str(outcome[2]) + " for progesterone receptor."
-		elif outcome[1] =='UNSURE' and outcome[2] != 'UNSURE': 
-			str2="The report test "+ str(outcome[2]) + " for progesterone receptor. However, no precise prediction was made for estrogen receptor."
-		elif outcome[1] !='UNSURE' and outcome[2] == 'UNSURE':
-			str2="The report test "+ str(outcome[2]) + " for estrogen receptor. However, no precise prediction was made for progesterone receptor."
-		else:
-			str2="However, the information in you input is not enough for a precise hormone receptor status prediction."
-			return str1 + str2
-	elif outcome[0] == 'LUNG':
-		str1= "The report indicates the possibility of LUNG cancer. "
-		if outcome[3] == 'UNSURE':
-			str2 = "No precise cell type prediction was made."
-		elif outcome[3] == 'OTHER':
-			str2 = "The report shows the cancer is neither squamous cell carcinoma nor adenocarcinoma."
-		else: 
-			str2 = "The report shows the cancer cell type is " + str(outcome[3]) + "."
-		return str1 + str2
-	elif outcome[0] == 'CRC':
-		str1= "The report indicates the possibility of COLORECTAL cancer. "
-		if outcome[4]=='UNSURE':
-			str2="No precise prediction was made for carcinoembryonic antigen."
-		else:
-			str2-"The report shows the carcinoembryonic antigen status is " + str(outcome[4]) + "."
-		return str1 + str2
-	else:
-		return "The report indicates the possibility of PROSTATE cancer. "
+	return "The diagnosis is ", outcome[0], "Also, ", str(outcome[1:])
 
+# The specimen, labeled right breast ultrasound guided biopsy, received in formalin, consists of a 1.8x1.0x0.3 cm aggregate of tan/pink fibroadipose breast tissue cores which were placed in formalin at 11:55 am and are now submitted in one cassette. HM/mbc Microscopic Description. Sections show a needle core biopsy in which there is extensive infiltrating and in situ ductal adenocarcinoma. The tumor is high-grade with marked nuclear pleomorphism, single cell necrosis, prominent nucleoli and no propensity to form tubules. Cancerization of lobules by the DCIS is noted. Lymphvascular invasion is not identified.
