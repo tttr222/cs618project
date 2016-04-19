@@ -1,4 +1,4 @@
-Last Updated: 4/5/2016
+Last Updated: 4/18/2016
 
 CS618 Project
 
@@ -10,7 +10,7 @@ Core Design
 example to be classified.
 * The client component will submit a request to the HTTP server, 
 which will run an instance to classify the example text.
-* The text will be a snippet phrase/sentence of a pathological 
+* The input will be the unstructured textual content of a pathological 
 report. The learning/classification component will diagnose the 
 type of cancer and location site of cancer.
 * The result will be returned to the user in the form of a 
